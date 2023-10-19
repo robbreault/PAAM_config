@@ -305,6 +305,7 @@ components:
           pattern: ^[{]?[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}[}]?$
           type: string
           example: "77018695-3d4f-43a2-8ac6-4311db0a3d0a"
+          readOnly: true
         client:
           maxLength: 32
           pattern: ^[A-Za-z0-9]*$
@@ -315,6 +316,7 @@ components:
           pattern: ^((http|https):\/\/)?[\w-]+(\.[\w-]+)+([\w.,@?^=%&amp;:\/~+#-]*[\w@?^=%&amp;\/~+#-])*$
           type: string
           example: "https://clientname.idfcloud.net"
+          readOnly: true
         secure:
           required:
             - client
