@@ -1,718 +1,632 @@
----
-swagger: "2.0"
+openapi: 3.0.1
 info:
-  description: "This is a sample server Petstore server.  You can find out more about\
-    \ Swagger at [http://swagger.io](http://swagger.io) or on [irc.freenode.net, #swagger](http://swagger.io/irc/).\
-    \  For this sample, you can use the api key `special-key` to test the authorization\
-    \ filters."
-  version: "1.0.5"
-  title: "Swagger Petstore"
-  termsOfService: "http://swagger.io/terms/"
+  title: IDF PAAM
+  description: IDF Profile and Audit Management
   contact:
-    email: "apiteam@swagger.io"
-  license:
-    name: "Apache 2.0"
-    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
-host: "petstore.swagger.io"
-basePath: "/v2"
+    email: rob.breault@identityfusion.com
+  version: 1.0.2
+servers:
+  - url: https://admin.idfcloud.net/
 tags:
-- name: "pet"
-  description: "Everything about your Pets"
-  externalDocs:
-    description: "Find out more"
-    url: "http://swagger.io"
-- name: "store"
-  description: "Access to Petstore orders"
-- name: "user"
-  description: "Operations about user"
-  externalDocs:
-    description: "Find out more about our store"
-    url: "http://swagger.io"
-schemes:
-- "https"
-- "http"
+  - name: Client Config - Initial
+    description: Client Configuration Endpoint
+  - name: Client Config - Initial (Admin Only)
+    description: Client Configuration Admin Endpoint
+  - name: audit
+    description: Audit Endpoint
 paths:
-  /pet/{petId}/uploadImage:
-    post:
+  /config/init:
+    get:
       tags:
-      - "pet"
-      summary: "uploads an image"
-      description: ""
-      operationId: "uploadFile"
-      consumes:
-      - "multipart/form-data"
-      produces:
-      - "application/json"
-      parameters:
-      - name: "petId"
-        in: "path"
-        description: "ID of pet to update"
-        required: true
-        type: "integer"
-        format: "int64"
-      - name: "additionalMetadata"
-        in: "formData"
-        description: "Additional data to pass to server"
-        required: false
-        type: "string"
-      - name: "file"
-        in: "formData"
-        description: "file to upload"
-        required: false
-        type: "file"
+        - Client Config - Initial
+      summary: Find config based on header hostname
+      description: Returns a single config
+      operationId: getConfigByHostname
       responses:
         200:
-          description: "successful operation"
-          schema:
-            $ref: "#/definitions/ApiResponse"
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConfigInit"
+        404:
+          description: Object not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error404"
+        default:
+          description: Operation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
       security:
-      - petstore_auth:
-        - "write:pets"
-        - "read:pets"
-  /pet:
-    post:
-      tags:
-      - "pet"
-      summary: "Add a new pet to the store"
-      description: ""
-      operationId: "addPet"
-      consumes:
-      - "application/json"
-      - "application/xml"
-      produces:
-      - "application/json"
-      - "application/xml"
-      parameters:
-      - in: "body"
-        name: "body"
-        description: "Pet object that needs to be added to the store"
-        required: true
-        schema:
-          $ref: "#/definitions/Pet"
-      responses:
-        405:
-          description: "Invalid input"
-      security:
-      - petstore_auth:
-        - "write:pets"
-        - "read:pets"
+        - client_oauth2:
+            - read
     put:
       tags:
-      - "pet"
-      summary: "Update an existing pet"
-      description: ""
-      operationId: "updatePet"
-      consumes:
-      - "application/json"
-      - "application/xml"
-      produces:
-      - "application/json"
-      - "application/xml"
-      parameters:
-      - in: "body"
-        name: "body"
-        description: "Pet object that needs to be added to the store"
+        - Client Config - Initial
+      summary: Update an existing config based on hostname
+      operationId: updateConfigByHostname
+      requestBody:
+        description: Config object that needs to be added
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConfigInit"
         required: true
-        schema:
-          $ref: "#/definitions/Pet"
       responses:
-        400:
-          description: "Invalid ID supplied"
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConfigInit"
         404:
-          description: "Pet not found"
-        405:
-          description: "Validation exception"
-      security:
-      - petstore_auth:
-        - "write:pets"
-        - "read:pets"
-  /pet/findByStatus:
-    get:
-      tags:
-      - "pet"
-      summary: "Finds Pets by status"
-      description: "Multiple status values can be provided with comma separated strings"
-      operationId: "findPetsByStatus"
-      produces:
-      - "application/json"
-      - "application/xml"
-      parameters:
-      - name: "status"
-        in: "query"
-        description: "Status values that need to be considered for filter"
-        required: true
-        type: "array"
-        items:
-          type: "string"
-          enum:
-          - "available"
-          - "pending"
-          - "sold"
-          default: "available"
-        collectionFormat: "multi"
-      responses:
-        200:
-          description: "successful operation"
-          schema:
-            type: "array"
-            items:
-              $ref: "#/definitions/Pet"
-        400:
-          description: "Invalid status value"
-      security:
-      - petstore_auth:
-        - "write:pets"
-        - "read:pets"
-  /pet/findByTags:
-    get:
-      tags:
-      - "pet"
-      summary: "Finds Pets by tags"
-      description: "Multiple tags can be provided with comma separated strings. Use\
-        \ tag1, tag2, tag3 for testing."
-      operationId: "findPetsByTags"
-      produces:
-      - "application/json"
-      - "application/xml"
-      parameters:
-      - name: "tags"
-        in: "query"
-        description: "Tags to filter by"
-        required: true
-        type: "array"
-        items:
-          type: "string"
-        collectionFormat: "multi"
-      responses:
-        200:
-          description: "successful operation"
-          schema:
-            type: "array"
-            items:
-              $ref: "#/definitions/Pet"
-        400:
-          description: "Invalid tag value"
-      security:
-      - petstore_auth:
-        - "write:pets"
-        - "read:pets"
-      deprecated: true
-  /pet/{petId}:
-    get:
-      tags:
-      - "pet"
-      summary: "Find pet by ID"
-      description: "Returns a single pet"
-      operationId: "getPetById"
-      produces:
-      - "application/json"
-      - "application/xml"
-      parameters:
-      - name: "petId"
-        in: "path"
-        description: "ID of pet to return"
-        required: true
-        type: "integer"
-        format: "int64"
-      responses:
-        200:
-          description: "successful operation"
-          schema:
-            $ref: "#/definitions/Pet"
-        400:
-          description: "Invalid ID supplied"
-        404:
-          description: "Pet not found"
-      security:
-      - api_key: []
-    post:
-      tags:
-      - "pet"
-      summary: "Updates a pet in the store with form data"
-      description: ""
-      operationId: "updatePetWithForm"
-      consumes:
-      - "application/x-www-form-urlencoded"
-      produces:
-      - "application/json"
-      - "application/xml"
-      parameters:
-      - name: "petId"
-        in: "path"
-        description: "ID of pet that needs to be updated"
-        required: true
-        type: "integer"
-        format: "int64"
-      - name: "name"
-        in: "formData"
-        description: "Updated name of the pet"
-        required: false
-        type: "string"
-      - name: "status"
-        in: "formData"
-        description: "Updated status of the pet"
-        required: false
-        type: "string"
-      responses:
-        405:
-          description: "Invalid input"
-      security:
-      - petstore_auth:
-        - "write:pets"
-        - "read:pets"
-    delete:
-      tags:
-      - "pet"
-      summary: "Deletes a pet"
-      description: ""
-      operationId: "deletePet"
-      produces:
-      - "application/json"
-      - "application/xml"
-      parameters:
-      - name: "api_key"
-        in: "header"
-        required: false
-        type: "string"
-      - name: "petId"
-        in: "path"
-        description: "Pet id to delete"
-        required: true
-        type: "integer"
-        format: "int64"
-      responses:
-        400:
-          description: "Invalid ID supplied"
-        404:
-          description: "Pet not found"
-      security:
-      - petstore_auth:
-        - "write:pets"
-        - "read:pets"
-  /store/order:
-    post:
-      tags:
-      - "store"
-      summary: "Place an order for a pet"
-      description: ""
-      operationId: "placeOrder"
-      consumes:
-      - "application/json"
-      produces:
-      - "application/json"
-      - "application/xml"
-      parameters:
-      - in: "body"
-        name: "body"
-        description: "order placed for purchasing the pet"
-        required: true
-        schema:
-          $ref: "#/definitions/Order"
-      responses:
-        200:
-          description: "successful operation"
-          schema:
-            $ref: "#/definitions/Order"
-        400:
-          description: "Invalid Order"
-  /store/order/{orderId}:
-    get:
-      tags:
-      - "store"
-      summary: "Find purchase order by ID"
-      description: "For valid response try integer IDs with value >= 1 and <= 10.\
-        \ Other values will generated exceptions"
-      operationId: "getOrderById"
-      produces:
-      - "application/json"
-      - "application/xml"
-      parameters:
-      - name: "orderId"
-        in: "path"
-        description: "ID of pet that needs to be fetched"
-        required: true
-        type: "integer"
-        maximum: 10
-        minimum: 1
-        format: "int64"
-      responses:
-        200:
-          description: "successful operation"
-          schema:
-            $ref: "#/definitions/Order"
-        400:
-          description: "Invalid ID supplied"
-        404:
-          description: "Order not found"
-    delete:
-      tags:
-      - "store"
-      summary: "Delete purchase order by ID"
-      description: "For valid response try integer IDs with positive integer value.\
-        \ Negative or non-integer values will generate API errors"
-      operationId: "deleteOrder"
-      produces:
-      - "application/json"
-      - "application/xml"
-      parameters:
-      - name: "orderId"
-        in: "path"
-        description: "ID of the order that needs to be deleted"
-        required: true
-        type: "integer"
-        minimum: 1
-        format: "int64"
-      responses:
-        400:
-          description: "Invalid ID supplied"
-        404:
-          description: "Order not found"
-  /store/inventory:
-    get:
-      tags:
-      - "store"
-      summary: "Returns pet inventories by status"
-      description: "Returns a map of status codes to quantities"
-      operationId: "getInventory"
-      produces:
-      - "application/json"
-      parameters: []
-      responses:
-        200:
-          description: "successful operation"
-          schema:
-            type: "object"
-            additionalProperties:
-              type: "integer"
-              format: "int32"
-      security:
-      - api_key: []
-  /user/createWithArray:
-    post:
-      tags:
-      - "user"
-      summary: "Creates list of users with given input array"
-      description: ""
-      operationId: "createUsersWithArrayInput"
-      consumes:
-      - "application/json"
-      produces:
-      - "application/json"
-      - "application/xml"
-      parameters:
-      - in: "body"
-        name: "body"
-        description: "List of user object"
-        required: true
-        schema:
-          type: "array"
-          items:
-            $ref: "#/definitions/User"
-      responses:
+          description: Object not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error404"
         default:
-          description: "successful operation"
-  /user/createWithList:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - client_oauth2:
+            - write
+            - read
+      x-codegen-request-body-name: body
     post:
       tags:
-      - "user"
-      summary: "Creates list of users with given input array"
-      description: ""
-      operationId: "createUsersWithListInput"
-      consumes:
-      - "application/json"
-      produces:
-      - "application/json"
-      - "application/xml"
-      parameters:
-      - in: "body"
-        name: "body"
-        description: "List of user object"
+        - Client Config - Initial (Admin Only)
+      summary: Create a new client config (ADMIN ONLY)
+      operationId: createClient
+      requestBody:
+        description: Client config object that needs to be added
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConfigInit"
         required: true
-        schema:
-          type: "array"
-          items:
-            $ref: "#/definitions/User"
       responses:
+        201:
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConfigInit"
         default:
-          description: "successful operation"
-  /user/{username}:
-    get:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - admin_oauth2:
+            - read
+            - write
+      x-codegen-request-body-name: body
+    patch:
       tags:
-      - "user"
-      summary: "Get user by user name"
-      description: ""
-      operationId: "getUserByName"
-      produces:
-      - "application/json"
-      - "application/xml"
-      parameters:
-      - name: "username"
-        in: "path"
-        description: "The name that needs to be fetched. Use user1 for testing. "
+        - Client Config - Initial
+      summary: Update an existing config based on hostname
+      operationId: updateConfigByHostname
+      requestBody:
+        description: Patch object
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatchObject"
         required: true
-        type: "string"
       responses:
         200:
-          description: "successful operation"
-          schema:
-            $ref: "#/definitions/User"
-        400:
-          description: "Invalid username supplied"
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConfigInit"
         404:
-          description: "User not found"
+          description: Object not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error404"
+        default:
+          description: Operation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - admin_oauth2:
+            - write
+            - read
+      x-codegen-request-body-name: body
+  /config/init/{configId}:
+    get:
+      tags:
+        - Client Config - Initial (Admin Only)
+      summary: Find config by ID (ADMIN ONLY)
+      description: Returns a single config
+      operationId: getConfigById
+      parameters:
+        - name: configId
+          in: path
+          description: ID of config to return
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConfigInit"
+        404:
+          description: Object not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error404"
+        default:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - admin_oauth2:
+            - write
+            - read
     put:
       tags:
-      - "user"
-      summary: "Updated user"
-      description: "This can only be done by the logged in user."
-      operationId: "updateUser"
-      consumes:
-      - "application/json"
-      produces:
-      - "application/json"
-      - "application/xml"
+        - Client Config - Initial (Admin Only)
+      summary: Updates a config in the store (ADMIN ONLY)
+      operationId: updateConfig
       parameters:
-      - name: "username"
-        in: "path"
-        description: "name that need to be updated"
-        required: true
-        type: "string"
-      - in: "body"
-        name: "body"
-        description: "Updated user object"
-        required: true
-        schema:
-          $ref: "#/definitions/User"
-      responses:
-        400:
-          description: "Invalid user supplied"
-        404:
-          description: "User not found"
-    delete:
-      tags:
-      - "user"
-      summary: "Delete user"
-      description: "This can only be done by the logged in user."
-      operationId: "deleteUser"
-      produces:
-      - "application/json"
-      - "application/xml"
-      parameters:
-      - name: "username"
-        in: "path"
-        description: "The name that needs to be deleted"
-        required: true
-        type: "string"
-      responses:
-        400:
-          description: "Invalid username supplied"
-        404:
-          description: "User not found"
-  /user/login:
-    get:
-      tags:
-      - "user"
-      summary: "Logs user into the system"
-      description: ""
-      operationId: "loginUser"
-      produces:
-      - "application/json"
-      - "application/xml"
-      parameters:
-      - name: "username"
-        in: "query"
-        description: "The user name for login"
-        required: true
-        type: "string"
-      - name: "password"
-        in: "query"
-        description: "The password for login in clear text"
-        required: true
-        type: "string"
+        - name: configId
+          in: path
+          description: ID of config to return
+          required: true
+          schema:
+            type: string
       responses:
         200:
-          description: "successful operation"
-          headers:
-            X-Expires-After:
-              type: "string"
-              format: "date-time"
-              description: "date in UTC when token expires"
-            X-Rate-Limit:
-              type: "integer"
-              format: "int32"
-              description: "calls per hour allowed by the user"
-          schema:
-            type: "string"
-        400:
-          description: "Invalid username/password supplied"
-  /user/logout:
-    get:
-      tags:
-      - "user"
-      summary: "Logs out current logged in user session"
-      description: ""
-      operationId: "logoutUser"
-      produces:
-      - "application/json"
-      - "application/xml"
-      parameters: []
-      responses:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConfigInit"
+        404:
+          description: Object not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error404"
         default:
-          description: "successful operation"
-  /user:
-    post:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - client_oauth2:
+            - write
+            - read
+    patch:
       tags:
-      - "user"
-      summary: "Create user"
-      description: "This can only be done by the logged in user."
-      operationId: "createUser"
-      consumes:
-      - "application/json"
-      produces:
-      - "application/json"
-      - "application/xml"
+        - Client Config - Initial (Admin Only)
+      summary: Updates a config in the store (ADMIN ONLY)
+      operationId: patchConfig
       parameters:
-      - in: "body"
-        name: "body"
-        description: "Created user object"
+        - name: configId
+          in: path
+          description: ID of config to return
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: Patch object
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatchObject"
         required: true
-        schema:
-          $ref: "#/definitions/User"
       responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConfigInit"
+        404:
+          description: Object not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error404"
         default:
-          description: "successful operation"
-securityDefinitions:
-  api_key:
-    type: "apiKey"
-    name: "api_key"
-    in: "header"
-  petstore_auth:
-    type: "oauth2"
-    authorizationUrl: "https://petstore.swagger.io/oauth/authorize"
-    flow: "implicit"
-    scopes:
-      read:pets: "read your pets"
-      write:pets: "modify pets in your account"
-definitions:
-  ApiResponse:
-    type: "object"
-    properties:
-      code:
-        type: "integer"
-        format: "int32"
-      type:
-        type: "string"
-      message:
-        type: "string"
-  Category:
-    type: "object"
-    properties:
-      id:
-        type: "integer"
-        format: "int64"
-      name:
-        type: "string"
-    xml:
-      name: "Category"
-  Pet:
-    type: "object"
-    required:
-    - "name"
-    - "photoUrls"
-    properties:
-      id:
-        type: "integer"
-        format: "int64"
-      category:
-        $ref: "#/definitions/Category"
-      name:
-        type: "string"
-        example: "doggie"
-      photoUrls:
-        type: "array"
-        xml:
-          wrapped: true
-        items:
-          type: "string"
-          xml:
-            name: "photoUrl"
-      tags:
-        type: "array"
-        xml:
-          wrapped: true
-        items:
-          xml:
-            name: "tag"
-          $ref: "#/definitions/Tag"
-      status:
-        type: "string"
-        description: "pet status in the store"
-        enum:
-        - "available"
-        - "pending"
-        - "sold"
-    xml:
-      name: "Pet"
-  Tag:
-    type: "object"
-    properties:
-      id:
-        type: "integer"
-        format: "int64"
-      name:
-        type: "string"
-    xml:
-      name: "Tag"
-  Order:
-    type: "object"
-    properties:
-      id:
-        type: "integer"
-        format: "int64"
-      petId:
-        type: "integer"
-        format: "int64"
-      quantity:
-        type: "integer"
-        format: "int32"
-      shipDate:
-        type: "string"
-        format: "date-time"
-      status:
-        type: "string"
-        description: "Order Status"
-        enum:
-        - "placed"
-        - "approved"
-        - "delivered"
-      complete:
-        type: "boolean"
-    xml:
-      name: "Order"
-  User:
-    type: "object"
-    properties:
-      id:
-        type: "integer"
-        format: "int64"
-      username:
-        type: "string"
-      firstName:
-        type: "string"
-      lastName:
-        type: "string"
-      email:
-        type: "string"
-      password:
-        type: "string"
-      phone:
-        type: "string"
-      userStatus:
-        type: "integer"
-        format: "int32"
-        description: "User Status"
-    xml:
-      name: "User"
-externalDocs:
-  description: "Find out more about Swagger"
-  url: "http://swagger.io"
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - client_oauth2:
+            - write
+            - read
+      x-codegen-request-body-name: body
+components:
+  schemas:
+    PatchObject:
+      type: array
+      maxItems: 99
+      items:
+        required:
+          - field
+          - operation
+          - value
+        type: object
+        properties:
+          operation:
+            type: string
+            enum:
+              - "add"
+              - "copy"
+              - "increment"
+              - "move"
+              - "remove"
+              - "replace"
+              - "transform"
+            example: "replace"
+          field:
+            type: string
+            example: "propertyName"
+          value:
+            type: string
+            example: "newValue"
+        additionalProperties: false
+      additionalProperties: false
+    ConfigInit:
+      required:
+        - baseUrl
+        - client
+        - client_id
+        - nonsecure
+        - secure
+      type: object
+      properties:
+        client_id:
+          pattern: ^[{]?[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}[}]?$
+          type: string
+          example: "77018695-3d4f-43a2-8ac6-4311db0a3d0a"
+        client:
+          maxLength: 32
+          pattern: ^[A-Za-z0-9]*$
+          type: string
+          example: "clientname"
+        baseUrl:
+          maxLength: 64
+          pattern: ^((http|https):\/\/)?[\w-]+(\.[\w-]+)+([\w.,@?^=%&amp;:\/~+#-]*[\w@?^=%&amp;\/~+#-])*$
+          type: string
+          example: "https://clientname.idfcloud.net"
+        secure:
+          required:
+            - client
+            - license
+          type: object
+          properties:
+            client:
+              required:
+                - displayName
+                - support
+              type: object
+              properties:
+                displayName:
+                  maxLength: 64
+                  pattern: ^[A-Za-z0-9._ :-]*$
+                  type: string
+                  example: "Formal Client Name"
+                support:
+                  maxLength: 64
+                  pattern: ^[a-zA-Z0-9@._ -]*$
+                  type: string
+                  example: "support@client.com"
+              additionalProperties: false
+            license:
+              required:
+                - audit
+                - cpm
+                - csr
+              type: object
+              properties:
+                cpm:
+                  required:
+                    - enabled
+                    - name
+                  type: object
+                  properties:
+                    name:
+                      maxLength: 64
+                      pattern: ^[A-Za-z0-9._ :-]*$
+                      type: string
+                      example: "Customer Profile Management"
+                    enabled:
+                      type: boolean
+                      example: true
+                    expiration:
+                      maxLength: 32
+                      pattern: ^\d{4}(.\d{2}){2}(\s|T)(\d{2}.){2}\d{2}Z$
+                      type: string
+                      example: "2025‐01‐12T19:38:53Z"
+                  additionalProperties: false
+                csr:
+                  required:
+                    - enabled
+                    - name
+                  type: object
+                  properties:
+                    name:
+                      maxLength: 64
+                      pattern: ^[A-Za-z0-9._ :-]*$
+                      type: string
+                      example: "Customer Service Manager"
+                    enabled:
+                      type: boolean
+                      example: true
+                    expiration:
+                      maxLength: 32
+                      pattern: ^\d{4}(.\d{2}){2}(\s|T)(\d{2}.){2}\d{2}Z$
+                      type: string
+                      example: "2025‐01‐12T19:38:53Z"
+                  additionalProperties: false
+                audit:
+                  required:
+                    - enabled
+                    - name
+                  type: object
+                  properties:
+                    name:
+                      maxLength: 64
+                      pattern: ^[A-Za-z0-9._ :-]*$
+                      type: string
+                      example: "Audit Management"
+                    enabled:
+                      type: boolean
+                      example: true
+                    expiration:
+                      maxLength: 32
+                      pattern: ^\d{4}(.\d{2}){2}(\s|T)(\d{2}.){2}\d{2}Z$
+                      type: string
+                      example: "2025‐01‐12T19:38:53Z"
+                  additionalProperties: false
+              additionalProperties: false
+          additionalProperties: false
+        nonsecure:
+          type: object
+          properties:
+            access:
+              required:
+                - baseUrl
+                - name
+                - timeout
+              type: object
+              properties:
+                name:
+                  maxLength: 64
+                  pattern: ^[A-Za-z0-9 @.,_()-]*$
+                  type: string
+                  example: "Access Management (AM)"
+                baseUrl:
+                  maxLength: 128
+                  pattern: ^((http|https):\/\/)?[\w-]+(\.[\w-]+)+([\w.,@?^=%&amp;:\/~+#-]*[\w@?^=%&amp;\/~+#-])*$
+                  type: string
+                  example: "https://openam-identityfusion-demo.forgeblocks.com/am"
+                timeout:
+                  maximum: 30000
+                  minimum: 1000
+                  type: integer
+                  format: int32
+                  example: 5000
+              additionalProperties: false
+            apps:
+              type: object
+              properties:
+                cpm:
+                  required:
+                    - client_id
+                    - realm
+                    - redirectUrl
+                    - scope
+                    - tree
+                  type: object
+                  properties:
+                    redirectUrl:
+                      maxLength: 32
+                      pattern: ^[A-Za-z0-9./-]*$
+                      type: string
+                      example: "/cpm"
+                    realm:
+                      maxLength: 32
+                      pattern: ^[a-zA-Z0-9_ ]*$
+                      type: string
+                      example: "bravo"
+                    client_id:
+                      maxLength: 32
+                      pattern: ^[A-Za-z0-9._-]*$
+                      type: string
+                      example: "idf_cpmportal"
+                    scope:
+                      maxLength: 32
+                      pattern: ^[A-Za-z0-9._:*-]*$
+                      type: string
+                      example: "fr:idm:*"
+                    tree:
+                      maxLength: 32
+                      pattern: ^[a-zA-Z0-9_ ]*$
+                      type: string
+                      example: "sdkAuthenticationTree"
+                  additionalProperties: false
+                csr:
+                  required:
+                    - client_id
+                    - realm
+                    - redirectUrl
+                    - scope
+                    - tree
+                  type: object
+                  properties:
+                    redirectUrl:
+                      maxLength: 32
+                      pattern: ^[A-Za-z0-9./-]*$
+                      type: string
+                      example: "/csr"
+                    realm:
+                      maxLength: 32
+                      pattern: ^[a-zA-Z0-9_ ]*$
+                      type: string
+                      example: "alpha"
+                    client_id:
+                      maxLength: 32
+                      pattern: ^[a-zA-Z0-9_ ]*$
+                      type: string
+                      example: "idf_csrportal"
+                    scope:
+                      maxLength: 32
+                      pattern: ^[A-Za-z0-9._:*-]*$
+                      type: string
+                      example: "fr:idm:*"
+                    tree:
+                      maxLength: 32
+                      pattern: ^[a-zA-Z0-9_ ]*$
+                      type: string
+                      example: "sdkAuthenticationTree"
+                  additionalProperties: false
+                audit:
+                  required:
+                    - client_id
+                    - realm
+                    - redirectUrl
+                    - scope
+                    - tree
+                  type: object
+                  properties:
+                    redirectUrl:
+                      maxLength: 32
+                      pattern: ^[A-Za-z0-9./-]*$
+                      type: string
+                      example: "/audit"
+                    realm:
+                      maxLength: 32
+                      pattern: ^[a-zA-Z0-9_ ]*$
+                      type: string
+                      example: "alpha"
+                    client_id:
+                      maxLength: 32
+                      pattern: ^[a-zA-Z0-9_ ]*$
+                      type: string
+                      example: "idf_auditportal"
+                    scope:
+                      maxLength: 32
+                      pattern: ^[A-Za-z0-9._:*-]*$
+                      type: string
+                      example: "fr:idm:*"
+                    tree:
+                      maxLength: 32
+                      pattern: ^[a-zA-Z0-9_ ]*$
+                      type: string
+                      example: "sdkAuthenticationTree"
+                  additionalProperties: false
+              additionalProperties: false
+            identity:
+              type: object
+              properties:
+                name:
+                  maxLength: 64
+                  pattern: ^[A-Za-z0-9 @.,_()-]*$
+                  type: string
+                  example: "Identity Management (IDM)"
+                baseUrl:
+                  maxLength: 128
+                  pattern: ^((http|https):\/\/)?[\w-]+(\.[\w-]+)+([\w.,@?^=%&amp;:\/~+#-]*[\w@?^=%&amp;\/~+#-])*$
+                  type: string
+                  example: "https://openam-identityfusion-demo.forgeblocks.com/openam"
+                timeout:
+                  maximum: 30000
+                  minimum: 1000
+                  type: integer
+                  format: int32
+                  example: 5000
+                themePath:
+                  maxLength: 128
+                  pattern: ^[A-Za-z0-9.,/?_=-]*$
+                  type: string
+                  example: "/config/ui/themerealm"
+                langPath:
+                  maxLength: 128
+                  pattern: ^[A-Za-z0-9.,/?_=-]*$
+                  type: string
+                  example: "/config/uilocale/en?_fields=login,shared"
+              additionalProperties: false
+          additionalProperties: false
+      additionalProperties: false
+    Error404:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 400
+        message:
+          maxLength: 164
+          pattern: ^[a-zA-Z0-9_ ]*$
+          type: string
+          example: "Object Not Found"
+        detail:
+          maxLength: 256
+          pattern: ^[a-zA-Z0-9_ ]*$
+          type: string
+          example: "The requested object does not exist"
+      additionalProperties: false
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 400
+        message:
+          maxLength: 164
+          pattern: ^[a-zA-Z0-9_ ]*$
+          type: string
+          example: "Message Error"
+        detail:
+          maxLength: 256
+          pattern: ^[a-zA-Z0-9_ ]*$
+          type: string
+          example: "Message Detail"
+      additionalProperties: false
+  securitySchemes:
+    client_oauth2:
+      type: oauth2
+      description: Client OAuth 2.0 Authorization Server
+      flows:
+        authorizationCode:
+          authorizationUrl: https://example.com/oauth/authorize
+          tokenUrl: https://example.com/oauth/token
+          scopes:
+            read: read objects in your account
+            write: modify objects in your account
+    admin_oauth2:
+      type: oauth2
+      description: Admin OAuth 2.0 Authorization Server
+      flows:
+        authorizationCode:
+          authorizationUrl: https://example.com/oauth/authorize
+          tokenUrl: https://example.com/oauth/token
+          scopes:
+            read: read objects in all accounts
+            write: modify objects in all accounts
