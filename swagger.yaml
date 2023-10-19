@@ -12,7 +12,7 @@ tags:
     description: Client Configuration Endpoint
   - name: Client Config - Initial (Admin Only)
     description: Client Configuration Admin Endpoint
-  - name: audit
+  - name: Audit
     description: Audit Endpoint
 paths:
   /config/init:
@@ -84,7 +84,7 @@ paths:
       tags:
         - Client Config - Initial (Admin Only)
       summary: Create a new client config (ADMIN ONLY)
-      operationId: createClientAdmin
+      operationId: postCreateClientAdmin
       requestBody:
         description: Client config object that needs to be added
         content:
@@ -187,7 +187,7 @@ paths:
       tags:
         - Client Config - Initial (Admin Only)
       summary: Updates a config in the store (ADMIN ONLY)
-      operationId: updateConfigByIdAdmin
+      operationId: putConfigByIdAdmin
       parameters:
         - name: configId
           in: path
