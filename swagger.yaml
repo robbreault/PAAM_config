@@ -48,7 +48,7 @@ paths:
       tags:
         - Client Config - Initial
       summary: Update an existing config based on hostname
-      operationId: updateConfigByHostname
+      operationId: putConfigByHostname
       requestBody:
         description: Config object that needs to be added
         content:
@@ -84,7 +84,7 @@ paths:
       tags:
         - Client Config - Initial (Admin Only)
       summary: Create a new client config (ADMIN ONLY)
-      operationId: createClient
+      operationId: createClientAdmin
       requestBody:
         description: Client config object that needs to be added
         content:
@@ -114,7 +114,7 @@ paths:
       tags:
         - Client Config - Initial
       summary: Update an existing config based on hostname
-      operationId: updateConfigByHostname
+      operationId: patchConfigByHostname
       requestBody:
         description: Patch object
         content:
@@ -152,7 +152,7 @@ paths:
         - Client Config - Initial (Admin Only)
       summary: Find config by ID (ADMIN ONLY)
       description: Returns a single config
-      operationId: getConfigById
+      operationId: getConfigByIdAdmin
       parameters:
         - name: configId
           in: path
@@ -187,7 +187,7 @@ paths:
       tags:
         - Client Config - Initial (Admin Only)
       summary: Updates a config in the store (ADMIN ONLY)
-      operationId: updateConfig
+      operationId: updateConfigByIdAdmin
       parameters:
         - name: configId
           in: path
@@ -222,7 +222,7 @@ paths:
       tags:
         - Client Config - Initial (Admin Only)
       summary: Updates a config in the store (ADMIN ONLY)
-      operationId: patchConfig
+      operationId: patchConfigByIdAdmin
       parameters:
         - name: configId
           in: path
