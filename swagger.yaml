@@ -8,20 +8,56 @@ info:
 servers:
   - url: https://admin.idfcloud.net/
 tags:
-  - name: Client Config - Initial
+  - name: Client Config
     description: Client Configuration Endpoint
-  - name: Client Config - Initial (Admin Only)
-    description: Client Configuration Admin Endpoint
+  - name: Client Config (Admin Only)
+    description: Client Configuration Init Admin Endpoint
   - name: Audit
     description: Audit Endpoint
 paths:
-  /config/init:
+  /config:
     get:
       tags:
-        - Client Config - Initial
+        - Client Config (Admin Only)
+      summary: Find all configs (ADMIN ONLY)
+      description: Returns all configs
+      operationId: getAllConfigByIdAdmin
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListConfigs"
+        404:
+          description: Object not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error404"
+        default:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - admin_oauth2:
+            - read
+  /config/{config_type}:
+    get:
+      tags:
+        - Client Config
       summary: Find config based on header hostname
       description: Returns a single config
       operationId: getConfigByHostname
+      parameters:
+        - name: config_type
+          in: path
+          description: Config type
+          required: true
+          schema:
+            $ref: "#/components/schemas/ConfigType"
       responses:
         200:
           description: successful operation
@@ -46,9 +82,16 @@ paths:
             - read
     put:
       tags:
-        - Client Config - Initial
+        - Client Config
       summary: Update an existing config based on hostname
       operationId: putConfigByHostname
+      parameters:
+        - name: config_type
+          in: path
+          description: Config type
+          required: true
+          schema:
+            $ref: "#/components/schemas/ConfigType"
       requestBody:
         description: Config object that needs to be added
         content:
@@ -82,9 +125,16 @@ paths:
       x-codegen-request-body-name: body
     post:
       tags:
-        - Client Config - Initial (Admin Only)
+        - Client Config (Admin Only)
       summary: Create a new client config (ADMIN ONLY)
       operationId: postCreateClientAdmin
+      parameters:
+        - name: config_type
+          in: path
+          description: Config type
+          required: true
+          schema:
+            $ref: "#/components/schemas/ConfigType"
       requestBody:
         description: Client config object that needs to be added
         content:
@@ -112,9 +162,16 @@ paths:
       x-codegen-request-body-name: body
     patch:
       tags:
-        - Client Config - Initial
+        - Client Config
       summary: Update an existing config based on hostname
       operationId: patchConfigByHostname
+      parameters:
+        - name: config_type
+          in: path
+          description: Config type
+          required: true
+          schema:
+            $ref: "#/components/schemas/ConfigType"
       requestBody:
         description: Patch object
         content:
@@ -146,20 +203,26 @@ paths:
             - write
             - read
       x-codegen-request-body-name: body
-  /config/init/{configId}:
+  /config/{config_type}/{client_id}:
     get:
       tags:
-        - Client Config - Initial (Admin Only)
+        - Client Config (Admin Only)
       summary: Find config by ID (ADMIN ONLY)
       description: Returns a single config
       operationId: getConfigByIdAdmin
       parameters:
-        - name: configId
+        - name: config_type
+          in: path
+          description: Config type
+          required: true
+          schema:
+            $ref: "#/components/schemas/ConfigType"
+        - name: client_id
           in: path
           description: ID of config to return
           required: true
           schema:
-            type: string
+            $ref: "#/components/schemas/ClientId"
       responses:
         200:
           description: successful operation
@@ -185,16 +248,22 @@ paths:
             - read
     put:
       tags:
-        - Client Config - Initial (Admin Only)
+        - Client Config (Admin Only)
       summary: Updates a config in the store (ADMIN ONLY)
       operationId: putConfigByIdAdmin
       parameters:
-        - name: configId
+        - name: config_type
+          in: path
+          description: Config type
+          required: true
+          schema:
+            $ref: "#/components/schemas/ConfigType"
+        - name: client_id
           in: path
           description: ID of config to return
           required: true
           schema:
-            type: string
+            $ref: "#/components/schemas/ClientId"
       responses:
         200:
           description: successful operation
@@ -220,16 +289,22 @@ paths:
             - read
     patch:
       tags:
-        - Client Config - Initial (Admin Only)
+        - Client Config (Admin Only)
       summary: Updates a config in the store (ADMIN ONLY)
       operationId: patchConfigByIdAdmin
       parameters:
-        - name: configId
+        - name: config_type
+          in: path
+          description: Config type
+          required: true
+          schema:
+            $ref: "#/components/schemas/ConfigType"
+        - name: client_id
           in: path
           description: ID of config to return
           required: true
           schema:
-            type: string
+            $ref: "#/components/schemas/ClientId"
       requestBody:
         description: Patch object
         content:
@@ -263,6 +338,96 @@ paths:
       x-codegen-request-body-name: body
 components:
   schemas:
+    ClientId:
+      maxLength: 36
+      type: string
+      pattern: ^[{]?[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}[}]?$
+      example: "77018695-3d4f-43a2-8ac6-4311db0a3d0a"
+    ClientName:
+      maxLength: 32
+      pattern: ^[A-Za-z0-9]*$
+      type: string
+      example: "clientname"
+    ConfigType:
+      type: string
+      example: "init"
+      enum:
+        - "init"
+        - "audit"
+        - "schema"
+        - "lang"
+        - "theme"
+    ConfigTypes:
+      minItems: 1
+      maxItems: 5
+      type: array
+      items:
+        $ref: "#/components/schemas/ConfigType"
+    Application:
+      required:
+        - app_client_id
+        - realm
+        - redirectUrl
+        - scope
+        - tree
+        - roles
+      type: object
+      properties:
+        redirectUrl:
+          maxLength: 32
+          pattern: ^[A-Za-z0-9./-]*$
+          type: string
+          example: "/app"
+        realm:
+          maxLength: 32
+          pattern: ^[a-zA-Z0-9_ ]*$
+          type: string
+          example: "realm"
+        app_client_id:
+          maxLength: 32
+          pattern: ^[A-Za-z0-9._-]*$
+          type: string
+          example: "app_portal_name"
+        scope:
+          maxLength: 32
+          pattern: ^[A-Za-z0-9._:*-]*$
+          type: string
+          example: "fr:idm:*"
+        tree:
+          maxLength: 32
+          pattern: ^[a-zA-Z0-9_ ]*$
+          type: string
+          example: "sdkAuthenticationTree"
+        roles:
+          type: array
+          minItems: 1
+          maxItems: 99
+          items:
+            maxLength: 64
+            pattern: ^[A-Za-z0-9._/-]*$
+            type: string
+            example: "role-name"
+      additionalProperties: false
+    License:
+      required:
+        - enabled
+        - name
+      type: object
+      properties:
+        name:
+          maxLength: 64
+          pattern: ^[A-Za-z0-9._ :-]*$
+          type: string
+          example: "Application Name"
+        enabled:
+          type: boolean
+          example: true
+        expiration:
+          maxLength: 32
+          pattern: ^\d{4}(.\d{2}){2}(\s|T)(\d{2}.){2}\d{2}Z$
+          type: string
+          example: "2025‐01‐12T19:38:53Z"
+      additionalProperties: false
     PatchObject:
       type: array
       maxItems: 99
@@ -285,13 +450,34 @@ components:
               - "transform"
             example: "replace"
           field:
+            maxLength: 64
             type: string
-            example: "propertyName"
+            pattern: ^[A-Za-z0-9./-]*$
+            example: "fieldName"
           value:
+            maxLength: 256
             type: string
-            example: "newValue"
+            pattern: ^[[A-Za-z0-9]*$
+            example: "fieldValue"
         additionalProperties: false
-      additionalProperties: false
+    ListConfigs:
+      minItems: 0
+      maxItems: 999
+      type: array
+      items:
+        required:
+          - client
+          - client_id
+          - config_types
+        type: object
+        properties:
+          client:
+            $ref: "#/components/schemas/ClientName"
+          client_id:
+            $ref: "#/components/schemas/ClientId"
+          config_types:
+            $ref: "#/components/schemas/ConfigTypes"
+        additionalProperties: false
     ConfigInit:
       required:
         - baseUrl
@@ -302,15 +488,9 @@ components:
       type: object
       properties:
         client_id:
-          pattern: ^[{]?[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}[}]?$
-          type: string
-          example: "77018695-3d4f-43a2-8ac6-4311db0a3d0a"
-          readOnly: true
+          $ref: "#/components/schemas/ClientId"
         client:
-          maxLength: 32
-          pattern: ^[A-Za-z0-9]*$
-          type: string
-          example: "clientname"
+          $ref: "#/components/schemas/ClientName"
         baseUrl:
           maxLength: 64
           pattern: ^((http|https):\/\/)?[\w-]+(\.[\w-]+)+([\w.,@?^=%&amp;:\/~+#-]*[\w@?^=%&amp;\/~+#-])*$
@@ -348,65 +528,11 @@ components:
               type: object
               properties:
                 cpm:
-                  required:
-                    - enabled
-                    - name
-                  type: object
-                  properties:
-                    name:
-                      maxLength: 64
-                      pattern: ^[A-Za-z0-9._ :-]*$
-                      type: string
-                      example: "Customer Profile Management"
-                    enabled:
-                      type: boolean
-                      example: true
-                    expiration:
-                      maxLength: 32
-                      pattern: ^\d{4}(.\d{2}){2}(\s|T)(\d{2}.){2}\d{2}Z$
-                      type: string
-                      example: "2025‐01‐12T19:38:53Z"
-                  additionalProperties: false
+                  $ref: "#/components/schemas/License"
                 csr:
-                  required:
-                    - enabled
-                    - name
-                  type: object
-                  properties:
-                    name:
-                      maxLength: 64
-                      pattern: ^[A-Za-z0-9._ :-]*$
-                      type: string
-                      example: "Customer Service Manager"
-                    enabled:
-                      type: boolean
-                      example: true
-                    expiration:
-                      maxLength: 32
-                      pattern: ^\d{4}(.\d{2}){2}(\s|T)(\d{2}.){2}\d{2}Z$
-                      type: string
-                      example: "2025‐01‐12T19:38:53Z"
-                  additionalProperties: false
+                  $ref: "#/components/schemas/License"
                 audit:
-                  required:
-                    - enabled
-                    - name
-                  type: object
-                  properties:
-                    name:
-                      maxLength: 64
-                      pattern: ^[A-Za-z0-9._ :-]*$
-                      type: string
-                      example: "Audit Management"
-                    enabled:
-                      type: boolean
-                      example: true
-                    expiration:
-                      maxLength: 32
-                      pattern: ^\d{4}(.\d{2}){2}(\s|T)(\d{2}.){2}\d{2}Z$
-                      type: string
-                      example: "2025‐01‐12T19:38:53Z"
-                  additionalProperties: false
+                  $ref: "#/components/schemas/License"
               additionalProperties: false
           additionalProperties: false
         nonsecure:
@@ -440,110 +566,11 @@ components:
               type: object
               properties:
                 cpm:
-                  required:
-                    - client_id
-                    - realm
-                    - redirectUrl
-                    - scope
-                    - tree
-                  type: object
-                  properties:
-                    redirectUrl:
-                      maxLength: 32
-                      pattern: ^[A-Za-z0-9./-]*$
-                      type: string
-                      example: "/cpm"
-                    realm:
-                      maxLength: 32
-                      pattern: ^[a-zA-Z0-9_ ]*$
-                      type: string
-                      example: "bravo"
-                    client_id:
-                      maxLength: 32
-                      pattern: ^[A-Za-z0-9._-]*$
-                      type: string
-                      example: "idf_cpmportal"
-                    scope:
-                      maxLength: 32
-                      pattern: ^[A-Za-z0-9._:*-]*$
-                      type: string
-                      example: "fr:idm:*"
-                    tree:
-                      maxLength: 32
-                      pattern: ^[a-zA-Z0-9_ ]*$
-                      type: string
-                      example: "sdkAuthenticationTree"
-                  additionalProperties: false
+                  $ref: "#/components/schemas/Application"
                 csr:
-                  required:
-                    - client_id
-                    - realm
-                    - redirectUrl
-                    - scope
-                    - tree
-                  type: object
-                  properties:
-                    redirectUrl:
-                      maxLength: 32
-                      pattern: ^[A-Za-z0-9./-]*$
-                      type: string
-                      example: "/csr"
-                    realm:
-                      maxLength: 32
-                      pattern: ^[a-zA-Z0-9_ ]*$
-                      type: string
-                      example: "alpha"
-                    client_id:
-                      maxLength: 32
-                      pattern: ^[a-zA-Z0-9_ ]*$
-                      type: string
-                      example: "idf_csrportal"
-                    scope:
-                      maxLength: 32
-                      pattern: ^[A-Za-z0-9._:*-]*$
-                      type: string
-                      example: "fr:idm:*"
-                    tree:
-                      maxLength: 32
-                      pattern: ^[a-zA-Z0-9_ ]*$
-                      type: string
-                      example: "sdkAuthenticationTree"
-                  additionalProperties: false
+                  $ref: "#/components/schemas/Application"
                 audit:
-                  required:
-                    - client_id
-                    - realm
-                    - redirectUrl
-                    - scope
-                    - tree
-                  type: object
-                  properties:
-                    redirectUrl:
-                      maxLength: 32
-                      pattern: ^[A-Za-z0-9./-]*$
-                      type: string
-                      example: "/audit"
-                    realm:
-                      maxLength: 32
-                      pattern: ^[a-zA-Z0-9_ ]*$
-                      type: string
-                      example: "alpha"
-                    client_id:
-                      maxLength: 32
-                      pattern: ^[a-zA-Z0-9_ ]*$
-                      type: string
-                      example: "idf_auditportal"
-                    scope:
-                      maxLength: 32
-                      pattern: ^[A-Za-z0-9._:*-]*$
-                      type: string
-                      example: "fr:idm:*"
-                    tree:
-                      maxLength: 32
-                      pattern: ^[a-zA-Z0-9_ ]*$
-                      type: string
-                      example: "sdkAuthenticationTree"
-                  additionalProperties: false
+                  $ref: "#/components/schemas/Application"
               additionalProperties: false
             identity:
               type: object
