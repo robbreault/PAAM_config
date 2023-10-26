@@ -8,18 +8,36 @@ info:
 servers:
   - url: https://admin.idfcloud.net/
 tags:
-  - name: Client Config
-    description: Client Configuration Endpoint
-  - name: Client Config (Admin Only)
-    description: Client Configuration Init Admin Endpoint
+  - name: Config - Init
+    description: Initial Client Configuration Endpoints
+  - name: Config - Audit
+    description: Client Audit Configuration Endpoints
+  - name: Config - Lang
+    description: Client Language Configuration Endpoints
+  - name: Config - Schema
+    description: Client Schema Configuration Endpoints
+  - name: Config - Theme
+    description: Client Schema Configuration Endpoints
+  - name: Config Management (Admin Only)
+    description: Admin Configuration Management Endpoints
+  - name: Config - Init (Admin Only)
+    description: Admin Client Configuration Endpoints
+  - name: Config - Audit (Admin Only)
+    description: Admin Audit Configuration Endpoints
+  - name: Config - Lang (Admin Only)
+    description: Admin Language Configuration Endpoints
+  - name: Config - Schema (Admin Only)
+    description: Admin Schema Configuration Endpoints
+  - name: Config - Theme (Admin Only)
+    description: Admin Theme Configuration Endpoints
   - name: Audit
     description: Audit Endpoint
 paths:
   /config:
     get:
       tags:
-        - Client Config (Admin Only)
-      summary: Find all configs (ADMIN ONLY)
+        - Config Management (Admin Only)
+      summary: Get all configs (ADMIN ONLY)
       description: Returns all configs
       operationId: getAllConfigByIdAdmin
       responses:
@@ -44,20 +62,13 @@ paths:
       security:
         - admin_oauth2:
             - read
-  /config/{config_type}:
+  /config/init:
     get:
       tags:
-        - Client Config
-      summary: Find config based on header hostname
+        - Config - Init
+      summary: Get initial config based on hostname
       description: Returns a single config
-      operationId: getConfigByHostname
-      parameters:
-        - name: config_type
-          in: path
-          description: Config type
-          required: true
-          schema:
-            $ref: "#/components/schemas/ConfigType"
+      operationId: getInitConfigByHostname
       responses:
         200:
           description: successful operation
@@ -82,16 +93,9 @@ paths:
             - read
     put:
       tags:
-        - Client Config
-      summary: Update an existing config based on hostname
-      operationId: putConfigByHostname
-      parameters:
-        - name: config_type
-          in: path
-          description: Config type
-          required: true
-          schema:
-            $ref: "#/components/schemas/ConfigType"
+        - Config - Init
+      summary: Update an existing initial config based on hostname
+      operationId: putInitConfigByHostname
       requestBody:
         description: Config object that needs to be added
         content:
@@ -123,55 +127,11 @@ paths:
             - write
             - read
       x-codegen-request-body-name: body
-    post:
-      tags:
-        - Client Config (Admin Only)
-      summary: Create a new client config (ADMIN ONLY)
-      operationId: postCreateClientAdmin
-      parameters:
-        - name: config_type
-          in: path
-          description: Config type
-          required: true
-          schema:
-            $ref: "#/components/schemas/ConfigType"
-      requestBody:
-        description: Client config object that needs to be added
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/ConfigInit"
-        required: true
-      responses:
-        201:
-          description: Created
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ConfigInit"
-        default:
-          description: Unexpected Error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Error"
-      security:
-        - admin_oauth2:
-            - read
-            - write
-      x-codegen-request-body-name: body
     patch:
       tags:
-        - Client Config
-      summary: Update an existing config based on hostname
-      operationId: patchConfigByHostname
-      parameters:
-        - name: config_type
-          in: path
-          description: Config type
-          required: true
-          schema:
-            $ref: "#/components/schemas/ConfigType"
+        - Config - Init
+      summary: Update an existing initial config based on hostname
+      operationId: patchInitConfigByHostname
       requestBody:
         description: Patch object
         content:
@@ -203,20 +163,568 @@ paths:
             - write
             - read
       x-codegen-request-body-name: body
-  /config/{config_type}/{client_id}:
+    post:
+      tags:
+        - Config - Init (Admin Only)
+      summary: Create a new client config (ADMIN ONLY)
+      operationId: postInitCreateClientAdmin
+      requestBody:
+        description: Client config object that needs to be added
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConfigInit"
+        required: true
+      responses:
+        201:
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConfigInit"
+        default:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - admin_oauth2:
+            - read
+            - write
+      x-codegen-request-body-name: body
+  /config/audit:
     get:
       tags:
-        - Client Config (Admin Only)
-      summary: Find config by ID (ADMIN ONLY)
+        - Config - Audit
+      summary: Get config based on header hostname
       description: Returns a single config
-      operationId: getConfigByIdAdmin
+      operationId: getAuditConfigByHostname
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConfigInit"
+        404:
+          description: Object not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error404"
+        default:
+          description: Operation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - client_oauth2:
+            - read
+    put:
+      tags:
+        - Config - Audit
+      summary: Update an existing config based on hostname
+      operationId: putAuditConfigByHostname
+      requestBody:
+        description: Config object that needs to be added
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConfigInit"
+        required: true
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConfigInit"
+        404:
+          description: Object not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error404"
+        default:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - client_oauth2:
+            - write
+            - read
+      x-codegen-request-body-name: body
+    patch:
+      tags:
+        - Config - Audit
+      summary: Update an existing config based on hostname
+      operationId: patchAuditConfigByHostname
+      requestBody:
+        description: Patch object
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatchObject"
+        required: true
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConfigInit"
+        404:
+          description: Object not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error404"
+        default:
+          description: Operation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - admin_oauth2:
+            - write
+            - read
+      x-codegen-request-body-name: body
+    post:
+      tags:
+        - Config - Audit (Admin Only)
+      summary: Create a new client config (ADMIN ONLY)
+      operationId: postAuditCreateClientAdmin
+      requestBody:
+        description: Client config object that needs to be added
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConfigInit"
+        required: true
+      responses:
+        201:
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConfigInit"
+        default:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - admin_oauth2:
+            - read
+            - write
+      x-codegen-request-body-name: body
+  /config/lang:
+    get:
+      tags:
+        - Config - Lang
+      summary: Get config based on header hostname
+      description: Returns a single config
+      operationId: getLangConfigByHostname
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConfigInit"
+        404:
+          description: Object not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error404"
+        default:
+          description: Operation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - client_oauth2:
+            - read
+    put:
+      tags:
+        - Config - Lang
+      summary: Update an existing config based on hostname
+      operationId: putLangConfigByHostname
+      requestBody:
+        description: Config object that needs to be added
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConfigInit"
+        required: true
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConfigInit"
+        404:
+          description: Object not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error404"
+        default:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - client_oauth2:
+            - write
+            - read
+      x-codegen-request-body-name: body
+    patch:
+      tags:
+        - Config - Lang
+      summary: Update an existing config based on hostname
+      operationId: patchLangConfigByHostname
+      requestBody:
+        description: Patch object
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatchObject"
+        required: true
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConfigInit"
+        404:
+          description: Object not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error404"
+        default:
+          description: Operation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - admin_oauth2:
+            - write
+            - read
+      x-codegen-request-body-name: body
+    post:
+      tags:
+        - Config - Lang (Admin Only)
+      summary: Create a new client config (ADMIN ONLY)
+      operationId: postAuditCreateClientAdmin
+      requestBody:
+        description: Client config object that needs to be added
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConfigInit"
+        required: true
+      responses:
+        201:
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConfigInit"
+        default:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - admin_oauth2:
+            - read
+            - write
+      x-codegen-request-body-name: body
+  /config/schema:
+    get:
+      tags:
+        - Config - Schema
+      summary: Get config based on header hostname
+      description: Returns a single config
+      operationId: getSchemaConfigByHostname
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConfigInit"
+        404:
+          description: Object not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error404"
+        default:
+          description: Operation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - client_oauth2:
+            - read
+    put:
+      tags:
+        - Config - Schema
+      summary: Update an existing config based on hostname
+      operationId: putSchemaConfigByHostname
+      requestBody:
+        description: Config object that needs to be added
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConfigInit"
+        required: true
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConfigInit"
+        404:
+          description: Object not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error404"
+        default:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - client_oauth2:
+            - write
+            - read
+      x-codegen-request-body-name: body
+    patch:
+      tags:
+        - Config - Schema
+      summary: Update an existing config based on hostname
+      operationId: patchSchemaConfigByHostname
+      requestBody:
+        description: Patch object
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatchObject"
+        required: true
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConfigInit"
+        404:
+          description: Object not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error404"
+        default:
+          description: Operation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - admin_oauth2:
+            - write
+            - read
+      x-codegen-request-body-name: body
+    post:
+      tags:
+        - Config - Schema (Admin Only)
+      summary: Create a new client config (ADMIN ONLY)
+      operationId: postSchemaCreateClientAdmin
+      requestBody:
+        description: Client config object that needs to be added
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConfigInit"
+        required: true
+      responses:
+        201:
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConfigInit"
+        default:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - admin_oauth2:
+            - read
+            - write
+      x-codegen-request-body-name: body
+  /config/theme:
+    get:
+      tags:
+        - Config - Theme
+      summary: Get config based on header hostname
+      description: Returns a single config
+      operationId: getThemeConfigByHostname
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConfigInit"
+        404:
+          description: Object not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error404"
+        default:
+          description: Operation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - client_oauth2:
+            - read
+    put:
+      tags:
+        - Config - Theme
+      summary: Update an existing config based on hostname
+      operationId: putThemeConfigByHostname
+      requestBody:
+        description: Config object that needs to be added
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConfigInit"
+        required: true
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConfigInit"
+        404:
+          description: Object not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error404"
+        default:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - client_oauth2:
+            - write
+            - read
+      x-codegen-request-body-name: body
+    patch:
+      tags:
+        - Config - Theme
+      summary: Update an existing config based on hostname
+      operationId: patchThemeConfigByHostname
+      requestBody:
+        description: Patch object
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatchObject"
+        required: true
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConfigInit"
+        404:
+          description: Object not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error404"
+        default:
+          description: Operation Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - admin_oauth2:
+            - write
+            - read
+      x-codegen-request-body-name: body
+    post:
+      tags:
+        - Config - Theme (Admin Only)
+      summary: Create a new client config (ADMIN ONLY)
+      operationId: postSchemaCreateClientAdmin
+      requestBody:
+        description: Client config object that needs to be added
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ConfigInit"
+        required: true
+      responses:
+        201:
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConfigInit"
+        default:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - admin_oauth2:
+            - read
+            - write
+      x-codegen-request-body-name: body
+  /config/init/{client_id}:
+    get:
+      tags:
+        - Config - Init (Admin Only)
+      summary: Get config by ID (ADMIN ONLY)
+      description: Returns a single config
+      operationId: getInitConfigByIdAdmin
       parameters:
-        - name: config_type
-          in: path
-          description: Config type
-          required: true
-          schema:
-            $ref: "#/components/schemas/ConfigType"
         - name: client_id
           in: path
           description: ID of config to return
@@ -248,16 +756,10 @@ paths:
             - read
     put:
       tags:
-        - Client Config (Admin Only)
+        - Config - Init (Admin Only)
       summary: Updates a config in the store (ADMIN ONLY)
-      operationId: putConfigByIdAdmin
+      operationId: putInitConfigByIdAdmin
       parameters:
-        - name: config_type
-          in: path
-          description: Config type
-          required: true
-          schema:
-            $ref: "#/components/schemas/ConfigType"
         - name: client_id
           in: path
           description: ID of config to return
@@ -289,16 +791,470 @@ paths:
             - read
     patch:
       tags:
-        - Client Config (Admin Only)
+        - Config - Init (Admin Only)
       summary: Updates a config in the store (ADMIN ONLY)
-      operationId: patchConfigByIdAdmin
+      operationId: patchInitConfigByIdAdmin
       parameters:
-        - name: config_type
+        - name: client_id
           in: path
-          description: Config type
+          description: ID of config to return
           required: true
           schema:
-            $ref: "#/components/schemas/ConfigType"
+            $ref: "#/components/schemas/ClientId"
+      requestBody:
+        description: Patch object
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatchObject"
+        required: true
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConfigInit"
+        404:
+          description: Object not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error404"
+        default:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - client_oauth2:
+            - write
+            - read
+      x-codegen-request-body-name: body
+  /config/audit/{client_id}:
+    get:
+      tags:
+        - Config - Audit (Admin Only)
+      summary: Get config by ID (ADMIN ONLY)
+      description: Returns a single config
+      operationId: getAuditConfigByIdAdmin
+      parameters:
+        - name: client_id
+          in: path
+          description: ID of config to return
+          required: true
+          schema:
+            $ref: "#/components/schemas/ClientId"
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConfigInit"
+        404:
+          description: Object not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error404"
+        default:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - admin_oauth2:
+            - write
+            - read
+    put:
+      tags:
+        - Config - Audit (Admin Only)
+      summary: Updates a config in the store (ADMIN ONLY)
+      operationId: putAuditConfigByIdAdmin
+      parameters:
+        - name: client_id
+          in: path
+          description: ID of config to return
+          required: true
+          schema:
+            $ref: "#/components/schemas/ClientId"
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConfigInit"
+        404:
+          description: Object not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error404"
+        default:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - client_oauth2:
+            - write
+            - read
+    patch:
+      tags:
+        - Config - Audit (Admin Only)
+      summary: Updates a config in the store (ADMIN ONLY)
+      operationId: patchAdminConfigByIdAdmin
+      parameters:
+        - name: client_id
+          in: path
+          description: ID of config to return
+          required: true
+          schema:
+            $ref: "#/components/schemas/ClientId"
+      requestBody:
+        description: Patch object
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatchObject"
+        required: true
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConfigInit"
+        404:
+          description: Object not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error404"
+        default:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - client_oauth2:
+            - write
+            - read
+      x-codegen-request-body-name: body
+  /config/lang/{client_id}:
+    get:
+      tags:
+        - Config - Lang (Admin Only)
+      summary: Get config by ID (ADMIN ONLY)
+      description: Returns a single config
+      operationId: getLangConfigByIdAdmin
+      parameters:
+        - name: client_id
+          in: path
+          description: ID of config to return
+          required: true
+          schema:
+            $ref: "#/components/schemas/ClientId"
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConfigInit"
+        404:
+          description: Object not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error404"
+        default:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - admin_oauth2:
+            - write
+            - read
+    put:
+      tags:
+        - Config - Lang (Admin Only)
+      summary: Updates a config in the store (ADMIN ONLY)
+      operationId: putLangConfigByIdAdmin
+      parameters:
+        - name: client_id
+          in: path
+          description: ID of config to return
+          required: true
+          schema:
+            $ref: "#/components/schemas/ClientId"
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConfigInit"
+        404:
+          description: Object not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error404"
+        default:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - client_oauth2:
+            - write
+            - read
+    patch:
+      tags:
+        - Config - Lang (Admin Only)
+      summary: Updates a config in the store (ADMIN ONLY)
+      operationId: patchLangConfigByIdAdmin
+      parameters:
+        - name: client_id
+          in: path
+          description: ID of config to return
+          required: true
+          schema:
+            $ref: "#/components/schemas/ClientId"
+      requestBody:
+        description: Patch object
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatchObject"
+        required: true
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConfigInit"
+        404:
+          description: Object not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error404"
+        default:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - client_oauth2:
+            - write
+            - read
+      x-codegen-request-body-name: body
+  /config/schema/{client_id}:
+    get:
+      tags:
+        - Config - Schema (Admin Only)
+      summary: Get config by ID (ADMIN ONLY)
+      description: Returns a single config
+      operationId: getSchemaConfigByIdAdmin
+      parameters:
+        - name: client_id
+          in: path
+          description: ID of config to return
+          required: true
+          schema:
+            $ref: "#/components/schemas/ClientId"
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConfigInit"
+        404:
+          description: Object not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error404"
+        default:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - admin_oauth2:
+            - write
+            - read
+    put:
+      tags:
+        - Config - Schema (Admin Only)
+      summary: Updates a config in the store (ADMIN ONLY)
+      operationId: putSchemaConfigByIdAdmin
+      parameters:
+        - name: client_id
+          in: path
+          description: ID of config to return
+          required: true
+          schema:
+            $ref: "#/components/schemas/ClientId"
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConfigInit"
+        404:
+          description: Object not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error404"
+        default:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - client_oauth2:
+            - write
+            - read
+    patch:
+      tags:
+        - Config - Schema (Admin Only)
+      summary: Updates a config in the store (ADMIN ONLY)
+      operationId: patchSchemaConfigByIdAdmin
+      parameters:
+        - name: client_id
+          in: path
+          description: ID of config to return
+          required: true
+          schema:
+            $ref: "#/components/schemas/ClientId"
+      requestBody:
+        description: Patch object
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatchObject"
+        required: true
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConfigInit"
+        404:
+          description: Object not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error404"
+        default:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - client_oauth2:
+            - write
+            - read
+      x-codegen-request-body-name: body
+  /config/theme/{client_id}:
+    get:
+      tags:
+        - Config - Theme (Admin Only)
+      summary: Get config by ID (ADMIN ONLY)
+      description: Returns a single config
+      operationId: getThemeConfigByIdAdmin
+      parameters:
+        - name: client_id
+          in: path
+          description: ID of config to return
+          required: true
+          schema:
+            $ref: "#/components/schemas/ClientId"
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConfigInit"
+        404:
+          description: Object not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error404"
+        default:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - admin_oauth2:
+            - write
+            - read
+    put:
+      tags:
+        - Config - Theme (Admin Only)
+      summary: Updates a config in the store (ADMIN ONLY)
+      operationId: putThemeConfigByIdAdmin
+      parameters:
+        - name: client_id
+          in: path
+          description: ID of config to return
+          required: true
+          schema:
+            $ref: "#/components/schemas/ClientId"
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConfigInit"
+        404:
+          description: Object not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error404"
+        default:
+          description: Unexpected Error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+      security:
+        - client_oauth2:
+            - write
+            - read
+    patch:
+      tags:
+        - Config - Theme (Admin Only)
+      summary: Updates a config in the store (ADMIN ONLY)
+      operationId: patchThemeConfigByIdAdmin
+      parameters:
         - name: client_id
           in: path
           description: ID of config to return
@@ -343,26 +1299,12 @@ components:
       type: string
       pattern: ^[{]?[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}[}]?$
       example: "77018695-3d4f-43a2-8ac6-4311db0a3d0a"
+      readOnly: true
     ClientName:
       maxLength: 32
       pattern: ^[A-Za-z0-9]*$
       type: string
       example: "clientname"
-    ConfigType:
-      type: string
-      example: "init"
-      enum:
-        - "init"
-        - "audit"
-        - "schema"
-        - "lang"
-        - "theme"
-    ConfigTypes:
-      minItems: 1
-      maxItems: 5
-      type: array
-      items:
-        $ref: "#/components/schemas/ConfigType"
     Application:
       required:
         - app_client_id
@@ -476,7 +1418,20 @@ components:
           client_id:
             $ref: "#/components/schemas/ClientId"
           config_types:
-            $ref: "#/components/schemas/ConfigTypes"
+            minItems: 1
+            maxItems: 5
+            type: array
+            items:
+              type: string
+              enum:
+                - "init"
+                - "audit"
+                - "lang"
+                - "schema"
+                - "theme"
+            example:
+              - "init"
+              - "audit"
         additionalProperties: false
     ConfigInit:
       required:
