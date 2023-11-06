@@ -4,7 +4,7 @@ info:
   description: IDF Profile and Audit Management
   contact:
     email: rob.breault@identityfusion.com
-  version: 1.0.2
+  version: 1.0.4
 servers:
   - url: https://admin.idfcloud.net/
 tags:
@@ -691,7 +691,7 @@ paths:
       tags:
         - Config - Theme (Admin Only)
       summary: Create a new client config (ADMIN ONLY)
-      operationId: postSchemaCreateClientAdmin
+      operationId: postThemeCreateClientAdmin
       requestBody:
         description: Client config object that needs to be added
         content:
