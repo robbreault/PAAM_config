@@ -337,7 +337,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ConfigInit"
+                $ref: "#/components/schemas/Lang"
         404:
           description: Object not found
           content:
@@ -429,7 +429,7 @@ paths:
       tags:
         - Config - Lang (Admin Only)
       summary: Create a new client config (ADMIN ONLY)
-      operationId: postAuditCreateClientAdmin
+      operationId: postLangCreateClientAdmin
       requestBody:
         description: Client config object that needs to be added
         content:
@@ -730,7 +730,7 @@ paths:
           description: ID of config to return
           required: true
           schema:
-            $ref: "#/components/schemas/ClientId"
+            $ref: "#/components/schemas/Guid"
       responses:
         200:
           description: successful operation
@@ -765,7 +765,7 @@ paths:
           description: ID of config to return
           required: true
           schema:
-            $ref: "#/components/schemas/ClientId"
+            $ref: "#/components/schemas/Guid"
       responses:
         200:
           description: successful operation
@@ -800,7 +800,7 @@ paths:
           description: ID of config to return
           required: true
           schema:
-            $ref: "#/components/schemas/ClientId"
+            $ref: "#/components/schemas/Guid"
       requestBody:
         description: Patch object
         content:
@@ -845,7 +845,7 @@ paths:
           description: ID of config to return
           required: true
           schema:
-            $ref: "#/components/schemas/ClientId"
+            $ref: "#/components/schemas/Guid"
       responses:
         200:
           description: successful operation
@@ -880,7 +880,7 @@ paths:
           description: ID of config to return
           required: true
           schema:
-            $ref: "#/components/schemas/ClientId"
+            $ref: "#/components/schemas/Guid"
       responses:
         200:
           description: successful operation
@@ -915,7 +915,7 @@ paths:
           description: ID of config to return
           required: true
           schema:
-            $ref: "#/components/schemas/ClientId"
+            $ref: "#/components/schemas/Guid"
       requestBody:
         description: Patch object
         content:
@@ -960,7 +960,7 @@ paths:
           description: ID of config to return
           required: true
           schema:
-            $ref: "#/components/schemas/ClientId"
+            $ref: "#/components/schemas/Guid"
       responses:
         200:
           description: successful operation
@@ -995,7 +995,7 @@ paths:
           description: ID of config to return
           required: true
           schema:
-            $ref: "#/components/schemas/ClientId"
+            $ref: "#/components/schemas/Guid"
       responses:
         200:
           description: successful operation
@@ -1030,7 +1030,7 @@ paths:
           description: ID of config to return
           required: true
           schema:
-            $ref: "#/components/schemas/ClientId"
+            $ref: "#/components/schemas/Guid"
       requestBody:
         description: Patch object
         content:
@@ -1075,7 +1075,7 @@ paths:
           description: ID of config to return
           required: true
           schema:
-            $ref: "#/components/schemas/ClientId"
+            $ref: "#/components/schemas/Guid"
       responses:
         200:
           description: successful operation
@@ -1110,7 +1110,7 @@ paths:
           description: ID of config to return
           required: true
           schema:
-            $ref: "#/components/schemas/ClientId"
+            $ref: "#/components/schemas/Guid"
       responses:
         200:
           description: successful operation
@@ -1145,7 +1145,7 @@ paths:
           description: ID of config to return
           required: true
           schema:
-            $ref: "#/components/schemas/ClientId"
+            $ref: "#/components/schemas/Guid"
       requestBody:
         description: Patch object
         content:
@@ -1190,7 +1190,7 @@ paths:
           description: ID of config to return
           required: true
           schema:
-            $ref: "#/components/schemas/ClientId"
+            $ref: "#/components/schemas/Guid"
       responses:
         200:
           description: successful operation
@@ -1225,7 +1225,7 @@ paths:
           description: ID of config to return
           required: true
           schema:
-            $ref: "#/components/schemas/ClientId"
+            $ref: "#/components/schemas/Guid"
       responses:
         200:
           description: successful operation
@@ -1260,7 +1260,7 @@ paths:
           description: ID of config to return
           required: true
           schema:
-            $ref: "#/components/schemas/ClientId"
+            $ref: "#/components/schemas/Guid"
       requestBody:
         description: Patch object
         content:
@@ -1294,7 +1294,7 @@ paths:
       x-codegen-request-body-name: body
 components:
   schemas:
-    ClientId:
+    Guid:
       maxLength: 36
       type: string
       pattern: ^[{]?[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}[}]?$
@@ -1416,10 +1416,11 @@ components:
           client:
             $ref: "#/components/schemas/ClientName"
           client_id:
-            $ref: "#/components/schemas/ClientId"
+            $ref: "#/components/schemas/Guid"
           config_types:
             minItems: 1
             maxItems: 5
+            uniqueItems: true
             type: array
             items:
               type: string
@@ -1443,7 +1444,7 @@ components:
       type: object
       properties:
         client_id:
-          $ref: "#/components/schemas/ClientId"
+          $ref: "#/components/schemas/Guid"
         client:
           $ref: "#/components/schemas/ClientName"
         baseUrl:
@@ -1559,6 +1560,28 @@ components:
               additionalProperties: false
           additionalProperties: false
       additionalProperties: false
+    Lang:
+      required:
+        - _id
+        - enduser
+        - login
+        - shared
+      type: object
+      properties:
+        _id:
+          maxLength: 64
+          pattern: ^[a-zA-Z0-9_/ -]*$
+          type: string
+          example: "uilocale/en"
+        enduser:
+          type: object
+          additionalProperties: true
+        login:
+          type: object
+          additionalProperties: true
+        shared:
+          type: object
+          additionalProperties: true
     Error404:
       type: object
       properties:
