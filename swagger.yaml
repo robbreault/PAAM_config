@@ -4,7 +4,7 @@ info:
   description: IDF Profile and Audit Management
   contact:
     email: rob.breault@identityfusion.com
-  version: 1.0.4
+  version: 1.0.5
 servers:
   - url: https://admin.idfcloud.net/
 tags:
